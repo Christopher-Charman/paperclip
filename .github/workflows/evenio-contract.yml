@@ -1,0 +1,32 @@
+name: Evenio contract
+
+on:
+  pull_request:
+    paths:
+      - 'docs/evenio/**'
+      - 'deploy/evenio/**'
+      - 'scripts/check-evenio-*.mjs'
+      - '.github/workflows/evenio-contract.yml'
+  push:
+    branches:
+      - 'evenio/**'
+    paths:
+      - 'docs/evenio/**'
+      - 'deploy/evenio/**'
+      - 'scripts/check-evenio-*.mjs'
+      - '.github/workflows/evenio-contract.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: node scripts/check-evenio-architecture-contract.mjs
+      - run: node scripts/check-evenio-managed-host-config.mjs
+      - run: node scripts/check-evenio-identity-contract.mjs
