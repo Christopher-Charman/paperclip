@@ -22,7 +22,8 @@ const required = [
   'evidence_refs',
   'resource_usage',
   'completion_state',
-  'CONTRACT_READY / EXECUTION_DISABLED',
+  'existing Evenio-owned authenticated control plane',
+  'bounded execution capabilities',
   'runtime_health',
   'control_state',
   'runtime_audit',
@@ -31,7 +32,7 @@ const required = [
 
 const forbidden = [
   /target_runtime_id\s*=\s*fasthost\.powerpc/i,
-  /generic shell (?:is|shall be|becomes) (?:enabled|allowed|authorized)/i,
+  /unaudited unrestricted `exec\(arbitrary_command\)` backdoor (?:is|shall be|becomes) (?:enabled|allowed|authorized)/i,
   /publication authorized\s*:\s*true/i,
   /public mutation (?:is|shall be|becomes) (?:enabled|allowed|authorized)/i,
 ];
