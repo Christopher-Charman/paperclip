@@ -4,7 +4,7 @@ Status: source-level contract only. This document does not authorize deployment,
 
 ## Purpose
 
-Paperclip may orchestrate Evenio business-agent work, but it must not become the inference owner, shell authority, runtime identity authority, or concurrency authority. The adapter boundary therefore targets an Evenio-owned delegation endpoint and carries explicit identity/authority fields on every invocation.
+Paperclip may orchestrate Evenio business-agent work, but it must not become the inference owner, runtime identity authority, or concurrency authority. The adapter boundary targets the existing Evenio-owned control plane and carries explicit identity/authority fields on every invocation.
 
 ## Identity separation
 
@@ -31,11 +31,13 @@ Every request MUST bind:
 
 The adapter MUST reject an absent or different `target_runtime_id`. Cross-runtime fallback is prohibited.
 
-## Transport boundary
+## Transport and execution boundary
 
-The production adapter endpoint MUST be an Evenio-owned authenticated delegation endpoint. For an in-runtime Paperclip deployment the preferred endpoint is loopback-only. The adapter MUST NOT call Ollama directly as a substitute for delegation: Ollama is an inference resource behind the Evenio agent/runtime boundary, not Paperclip's authority surface.
+The production adapter MUST extend the existing Evenio-owned authenticated control plane rather than create a parallel task-execution service merely because the currently admitted capabilities are read-only. For an in-runtime Paperclip deployment the preferred endpoint is loopback-only. The adapter MUST NOT call Ollama directly as a substitute for delegation: Ollama is an inference resource behind the Evenio agent/runtime boundary, not Paperclip's authority surface.
 
-The adapter MUST NOT introduce generic shell execution, arbitrary filesystem mutation, or credential forwarding.
+Execution capabilities MUST be explicitly admitted, authority-bounded, identity-bound, auditable, idempotent where required, and receipt-producing. The control plane MAY admit filesystem mutation, process control, terminal/command execution, or other powerful operations when their capability contract and authority ceiling explicitly permit them. It MUST NOT expose an unaudited unrestricted `exec(arbitrary_command)` backdoor that bypasses capability admission, authorization, runtime identity binding, or durable receipts.
+
+A request-specific `authority_ceiling = read_only` describes that request/capability admission; it is not a permanent architectural ceiling on the Evenio control plane.
 
 ## Result contract
 
@@ -62,8 +64,10 @@ Paperclip heartbeat/session continuity MAY retain a delegation correlation ident
 
 Where the scope is registered in the Concurrency Ledger, ledger session/claim/run/lease state remains authoritative for coordination. Paperclip task state is orchestration/UI state and MUST NOT supersede live ledger ownership.
 
-## Fail-closed deployment gate
+## Execution admission gate
 
-Until an Evenio-owned task-execution delegation endpoint is independently accepted for this purpose, the implementation state is `CONTRACT_READY / EXECUTION_DISABLED`. Existing read-only `evenio-control-v1` tools (`runtime_health`, `control_state`, `runtime_audit`, `delegation_probe`) MUST NOT be repurposed into arbitrary task execution.
+The existing Evenio owned-control transport and `evenio-local-mcp` runtime binding are accepted evidence for the control-plane route. Paperclip task execution remains disabled only until the required mutating/delegation capability profile is implemented and accepted on that same control plane.
 
-Enabling execution requires separate runtime evidence and deployment authority. It does not authorize publication, spend, payout/KYC action, or public/commercial mutation.
+Existing read-only capabilities (`runtime_health`, `control_state`, `runtime_audit`, `delegation_probe`) remain read-only according to their own contracts; they need not be overloaded. New bounded execution capabilities should be added alongside them under the same authenticated control architecture.
+
+Enabling a bounded execution capability does not itself authorize publication, spend, payout/KYC action, or public/commercial mutation. Those destination authorities remain independently gated.
