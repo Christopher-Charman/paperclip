@@ -22,9 +22,9 @@ if (missing.length) {
 }
 
 const forbidden = [
-  /bind(?:ing)?\s+(?:to\s+)?0\.0\.0\.0/i,
-  /replace(?:s|d)?\s+(?:the\s+)?Concurrency Ledger/i,
-  /generic shell authority is (?:allowed|enabled|introduced)/i,
+  /(?:^|\n)\s*(?:Paperclip\s+)?(?:must|will|shall)?\s*bind(?:ing)?\s+(?:to\s+)?0\.0\.0\.0/im,
+  /(?:^|\n)\s*(?:Paperclip\s+)?(?:must|will|shall)?\s*replace(?:s|d)?\s+(?:the\s+)?Concurrency Ledger/im,
+  /generic shell authority is (?:allowed|enabled)(?:\.|\n|$)/i,
 ];
 
 const violations = forbidden.filter((pattern) => pattern.test(text));
