@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "contract": "evenio.paperclip.identity-mapping",
+  "invariant": ["MODEL", "ACTOR", "ROLE", "ROLE_ASSIGNMENT", "SESSION", "TASK", "RUN", "LEASE"],
+  "paperclip_scope": {
+    "agent": "ACTOR_REFERENCE",
+    "agent_task_session": "APPLICATION_SESSION_REFERENCE",
+    "issue_or_task": "BUSINESS_TASK_REFERENCE",
+    "runner_execution": "RUN_REFERENCE",
+    "heartbeat": "LIVENESS_ONLY"
+  },
+  "external_authority": {
+    "coordination": "Concurrency Ledger",
+    "control": "evenio-control-v1",
+    "local_tools": "Evenio local MCP",
+    "inference": "Ollama localhost",
+    "result_receipt": "existing signed/encrypted Evenio receipt chain"
+  },
+  "rules": {
+    "paperclip_session_is_ledger_session": false,
+    "paperclip_heartbeat_is_ledger_lease": false,
+    "paperclip_task_claim_supersedes_ledger_claim": false,
+    "paperclip_run_supersedes_ledger_run": false,
+    "paperclip_mcp_supersedes_evenio_local_mcp": false,
+    "paperclip_owns_ollama": false,
+    "generic_shell_authority": false
+  }
+}
