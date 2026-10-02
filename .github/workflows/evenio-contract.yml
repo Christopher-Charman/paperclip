@@ -30,3 +30,4 @@ jobs:
       - run: node scripts/check-evenio-architecture-contract.mjs
       - run: node scripts/check-evenio-managed-host-config.mjs
       - run: node scripts/check-evenio-identity-contract.mjs
+      - run: node scripts/check-evenio-delegation-contract.mjs
