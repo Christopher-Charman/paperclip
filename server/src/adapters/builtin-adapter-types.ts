@@ -8,6 +8,7 @@ export const BUILTIN_ADAPTER_TYPES = new Set([
   "paperclip_runner",
   "cursor_cloud",
   "cursor",
+  "evenio_control",
   "gemini_local",
   "grok_local",
   "hermes_gateway",
