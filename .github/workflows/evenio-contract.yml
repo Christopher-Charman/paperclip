@@ -6,6 +6,13 @@ on:
       - 'docs/evenio/**'
       - 'deploy/evenio/**'
       - 'scripts/check-evenio-*.mjs'
+      - 'packages/adapters/evenio-control/**'
+      - 'server/src/adapters/registry.ts'
+      - 'server/src/adapters/builtin-adapter-types.ts'
+      - 'server/package.json'
+      - 'ui/src/adapters/registry.ts'
+      - 'cli/src/adapters/registry.ts'
+      - 'pnpm-lock.yaml'
       - '.github/workflows/evenio-contract.yml'
   push:
     branches:
@@ -14,6 +21,13 @@ on:
       - 'docs/evenio/**'
       - 'deploy/evenio/**'
       - 'scripts/check-evenio-*.mjs'
+      - 'packages/adapters/evenio-control/**'
+      - 'server/src/adapters/registry.ts'
+      - 'server/src/adapters/builtin-adapter-types.ts'
+      - 'server/package.json'
+      - 'ui/src/adapters/registry.ts'
+      - 'cli/src/adapters/registry.ts'
+      - 'pnpm-lock.yaml'
       - '.github/workflows/evenio-contract.yml'
 
 permissions:
@@ -31,3 +45,7 @@ jobs:
       - run: node scripts/check-evenio-managed-host-config.mjs
       - run: node scripts/check-evenio-identity-contract.mjs
       - run: node scripts/check-evenio-delegation-contract.mjs
+      - run: node scripts/check-evenio-adapter-implementation.mjs
+      - run: corepack enable
+      - run: pnpm install --frozen-lockfile --filter @paperclipai/adapter-evenio-control...
+      - run: pnpm --filter @paperclipai/adapter-evenio-control typecheck
