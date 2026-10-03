@@ -74,6 +74,11 @@ const openclawGatewayCLIAdapter: CLIAdapterModule = {
   formatStdoutEvent: printOpenClawGatewayStreamEvent,
 };
 
+const evenioControlCLIAdapter: CLIAdapterModule = {
+  type: "evenio_control",
+  formatStdoutEvent: processCLIAdapter.formatStdoutEvent,
+};
+
 const adaptersByType = new Map<string, CLIAdapterModule>(
   [
     claudeLocalCLIAdapter,
@@ -88,6 +93,7 @@ const adaptersByType = new Map<string, CLIAdapterModule>(
     hermesGatewayCLIAdapter,
     hermesLocalCLIAdapter,
     openclawGatewayCLIAdapter,
+    evenioControlCLIAdapter,
     processCLIAdapter,
     httpCLIAdapter,
   ].map((a) => [a.type, a]),

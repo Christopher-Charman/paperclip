@@ -116,9 +116,15 @@ import {
   testEnvironment as openclawGatewayTestEnvironment,
 } from "@paperclipai/adapter-openclaw-gateway/server";
 import {
+  execute as evenioControlExecute,
+  testEnvironment as evenioControlTestEnvironment,
+  getConfigSchema as getEvenioControlConfigSchema,
+} from "@paperclipai/adapter-evenio-control/server";
+import {
   agentConfigurationDoc as openclawGatewayAgentConfigurationDoc,
   models as openclawGatewayModels,
 } from "@paperclipai/adapter-openclaw-gateway";
+import { agentConfigurationDoc as evenioControlAgentConfigurationDoc } from "@paperclipai/adapter-evenio-control";
 import { listCodexModels, refreshCodexModels } from "./codex-models.js";
 import { listCursorModels } from "./cursor-models.js";
 import {
@@ -814,6 +820,19 @@ const openclawGatewayAdapter: ServerAdapterModule = {
   agentConfigurationDoc: openclawGatewayAgentConfigurationDoc,
 };
 
+const evenioControlAdapter: ServerAdapterModule = {
+  type: "evenio_control",
+  runtimeToolDelivery: "invocation_context",
+  execute: evenioControlExecute,
+  testEnvironment: evenioControlTestEnvironment,
+  models: [],
+  supportsLocalAgentJwt: false,
+  supportsInstructionsBundle: false,
+  requiresMaterializedRuntimeSkills: false,
+  agentConfigurationDoc: evenioControlAgentConfigurationDoc,
+  getConfigSchema: getEvenioControlConfigSchema,
+};
+
 const openCodeLocalAdapter: ServerAdapterModule = {
   type: "opencode_local",
   runtimeToolDelivery: "environment",
@@ -880,6 +899,7 @@ function registerBuiltInAdapters() {
     hermesGatewayAdapter,
     hermesLocalAdapter,
     openclawGatewayAdapter,
+    evenioControlAdapter,
     processAdapter,
     httpAdapter,
   ]) {
