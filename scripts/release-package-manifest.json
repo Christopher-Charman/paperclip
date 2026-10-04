@@ -25,11 +25,6 @@
     "publishFromCi": true
   },
   {
-    "dir": "packages/adapters/evenio-control",
-    "name": "@paperclipai/adapter-evenio-control",
-    "publishFromCi": true
-  },
-  {
     "dir": "packages/adapters/gemini-local",
     "name": "@paperclipai/adapter-gemini-local",
     "publishFromCi": true
