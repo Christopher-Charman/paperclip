@@ -14,6 +14,7 @@ const cliPackage = read("cli/package.json");
 const serverPackage = read("server/package.json");
 const registryTest = read("server/src/adapters/registry.test.ts");
 const releaseManifest = read("scripts/release-package-manifest.json");
+const releasePackages = JSON.parse(releaseManifest);
 const lockfile = read("pnpm-lock.yaml");
 
 const requiredExecute = [
@@ -59,8 +60,6 @@ const registrationChecks = [
   [cliRegistry, 'type: "evenio_control"', "CLI registration"],
   [cliPackage, '"@paperclipai/adapter-evenio-control": "workspace:*"', "CLI workspace dependency"],
   [registryTest, '["evenio_control", "invocation_context"]', "runtime delivery strategy regression"],
-  [releaseManifest, '"name": "@paperclipai/adapter-evenio-control"', "release manifest package"],
-  [releaseManifest, '"publishFromCi": true', "release manifest CI enrollment"],
   [serverPackage, '"@paperclipai/adapter-evenio-control": "workspace:*"', "server workspace dependency"],
   [lockfile, "packages/adapters/evenio-control:", "lockfile adapter importer"],
   [lockfile, "link:../packages/adapters/evenio-control", "lockfile server link"],
@@ -68,6 +67,16 @@ const registrationChecks = [
 
 for (const [text, token, label] of registrationChecks) {
   if (!text.includes(token)) missing.push(label + ": " + token);
+}
+
+const evenioReleasePackage = releasePackages.find(
+  (entry) => entry?.name === "@paperclipai/adapter-evenio-control",
+);
+if (
+  evenioReleasePackage?.dir !== "packages/adapters/evenio-control" ||
+  evenioReleasePackage?.publishFromCi !== true
+) {
+  missing.push("release manifest enrollment for @paperclipai/adapter-evenio-control");
 }
 
 if (missing.length || violations.length) {
