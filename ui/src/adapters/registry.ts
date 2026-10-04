@@ -26,6 +26,14 @@ const builtinTypes = new Set<string>();
 
 // Original builtin adapters stored for restoration when external overrides
 // are deactivated or removed.
+const evenioControlUIAdapter: UIAdapterModule = {
+  type: "evenio_control",
+  label: "Evenio Control",
+  parseStdoutLine: processUIAdapter.parseStdoutLine,
+  ConfigFields: SchemaConfigFields,
+  buildAdapterConfig: buildSchemaAdapterConfig,
+};
+
 const builtinAdaptersByType = new Map<string, UIAdapterModule>();
 
 // Tracks which builtin types currently have an active external override.
@@ -67,6 +75,7 @@ function registerBuiltInUIAdapters() {
     piLocalUIAdapter,
     cursorLocalUIAdapter,
     openClawGatewayUIAdapter,
+    evenioControlUIAdapter,
     processUIAdapter,
     httpUIAdapter,
   ]) {
