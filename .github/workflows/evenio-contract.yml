@@ -48,4 +48,4 @@ jobs:
       - run: node scripts/check-evenio-adapter-implementation.mjs
       - run: corepack enable
       - run: pnpm install --ignore-scripts --no-frozen-lockfile --filter @paperclipai/server...
-      - run: pnpm --filter @paperclipai/server exec tsc --noEmit
+      - run: pnpm --filter @paperclipai/server exec tsc -p src/adapters/evenio-control/tsconfig.json --noEmit
