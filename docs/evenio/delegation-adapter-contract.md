@@ -1,6 +1,6 @@
 # Evenio delegation adapter contract
 
-Status: source-level contract only. This document does not authorize deployment, public mutation, business automation, or a wider Evenio control surface.
+Status: source-integrated adapter contract. The bounded Evenio `delegation_execute` / `workspace_write` capability and private loopback ingress are accepted infrastructure, but this document does not authorize live Paperclip deployment, public mutation, business automation, or a wider Evenio control surface.
 
 ## Purpose
 
@@ -64,10 +64,12 @@ Paperclip heartbeat/session continuity MAY retain a delegation correlation ident
 
 Where the scope is registered in the Concurrency Ledger, ledger session/claim/run/lease state remains authoritative for coordination. Paperclip task state is orchestration/UI state and MUST NOT supersede live ledger ownership.
 
-## Execution admission gate
+## Execution admission state
 
-The existing Evenio owned-control transport and `evenio-local-mcp` runtime binding are accepted evidence for the control-plane route. Paperclip task execution remains disabled only until the required mutating/delegation capability profile is implemented and accepted on that same control plane.
+The existing Evenio owned-control transport and `evenio-local-mcp` runtime binding are accepted evidence for the control-plane route. The required bounded mutating/delegation profile is also implemented and live-accepted on that control plane: `delegation_execute` admits only bounded `workspace_write` under `write_runtime`, and Paperclip has an accepted private loopback ingress at `127.0.0.1:18180/api/delegation/execute` authenticated by the dedicated `EVENIO_DELEGATION_TOKEN`.
 
-Existing read-only capabilities (`runtime_health`, `control_state`, `runtime_audit`, `delegation_probe`) remain read-only according to their own contracts; they need not be overloaded. New bounded execution capabilities should be added alongside them under the same authenticated control architecture.
+Existing read-only capabilities (`runtime_health`, `control_state`, `runtime_audit`, `delegation_probe`) remain read-only according to their own contracts. The Paperclip adapter MUST continue to use the accepted bounded delegation service; it must not invent a parallel receiver, generic shell, arbitrary HTTP target, or Git-based runtime-state transport.
 
-Enabling a bounded execution capability does not itself authorize publication, spend, payout/KYC action, or public/commercial mutation. Those destination authorities remain independently gated.
+Accepted infrastructure evidence includes `Christopher-Charman/evenio-online/docs/PAPERCLIP_BOUNDED_EXECUTION.md`, `docs/PAPERCLIP_LOOPBACK_DELEGATION_INGRESS.md`, PR #19 merge `645144a13430401f694f982ef8335db15dc94ed7`, and cross-transport replay receipt `cg-evenio-20261003-paperclip-cross-transport-replay-01`.
+
+Source integration and infrastructure acceptance do not themselves authorize live Paperclip deployment, publication, spend, payout/KYC action, automation enablement, STOP clearing, or public/commercial mutation. Those destination authorities remain independently gated.
