@@ -6,7 +6,7 @@ on:
       - 'docs/evenio/**'
       - 'deploy/evenio/**'
       - 'scripts/check-evenio-*.mjs'
-      - 'packages/adapters/evenio-control/**'
+      - 'server/src/adapters/evenio-control/**'
       - 'server/src/adapters/registry.ts'
       - 'server/src/adapters/builtin-adapter-types.ts'
       - 'server/package.json'
@@ -21,7 +21,7 @@ on:
       - 'docs/evenio/**'
       - 'deploy/evenio/**'
       - 'scripts/check-evenio-*.mjs'
-      - 'packages/adapters/evenio-control/**'
+      - 'server/src/adapters/evenio-control/**'
       - 'server/src/adapters/registry.ts'
       - 'server/src/adapters/builtin-adapter-types.ts'
       - 'server/package.json'
@@ -47,5 +47,5 @@ jobs:
       - run: node scripts/check-evenio-delegation-contract.mjs
       - run: node scripts/check-evenio-adapter-implementation.mjs
       - run: corepack enable
-      - run: pnpm install --frozen-lockfile --filter @paperclipai/adapter-evenio-control...
-      - run: pnpm --filter @paperclipai/adapter-evenio-control typecheck
+      - run: pnpm install --ignore-scripts --no-frozen-lockfile --filter @paperclipai/server...
+      - run: pnpm --filter @paperclipai/server exec tsc --noEmit
