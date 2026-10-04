@@ -176,7 +176,7 @@ export async function execute(ctx: AdapterExecutionContext): Promise<AdapterExec
       summary: replay
         ? `Evenio replayed bounded handoff for Paperclip run ${ctx.runId}.`
         : `Evenio accepted bounded handoff for Paperclip run ${ctx.runId}.`,
-      resultJson: parsed,
+      resultJson: root,
     };
   } catch (error) {
     if (error instanceof Error && error.name === "AbortError") {

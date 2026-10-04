@@ -64,6 +64,7 @@ describe("built-in runtime connection tool delivery", () => {
     ["codex_local", "native_mcp"],
     ["cursor_cloud", "invocation_context"],
     ["cursor", "environment"],
+    ["evenio_control", "invocation_context"],
     ["gemini_local", "environment"],
     ["grok_local", "environment"],
     ["hermes_gateway", "invocation_context"],

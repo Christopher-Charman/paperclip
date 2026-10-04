@@ -3,15 +3,17 @@ import fs from "node:fs";
 
 const read = (path) => fs.readFileSync(new URL("../" + path, import.meta.url), "utf8");
 
-const execute = read("packages/adapters/evenio-control/src/server/execute.ts");
-const serverIndex = read("packages/adapters/evenio-control/src/server/index.ts");
-const packageJson = read("packages/adapters/evenio-control/package.json");
+const execute = read("server/src/adapters/evenio-control/execute.ts");
+const serverIndex = read("server/src/adapters/evenio-control/index.ts");
 const builtin = read("server/src/adapters/builtin-adapter-types.ts");
 const serverRegistry = read("server/src/adapters/registry.ts");
 const uiRegistry = read("ui/src/adapters/registry.ts");
 const cliRegistry = read("cli/src/adapters/registry.ts");
+const cliPackage = read("cli/package.json");
 const serverPackage = read("server/package.json");
-const lockfile = read("pnpm-lock.yaml");
+const registryTest = read("server/src/adapters/registry.test.ts");
+const releaseManifest = read("scripts/release-package-manifest.json");
+const dockerfile = read("Dockerfile");
 
 const requiredExecute = [
   'const ENDPOINT = "http://127.0.0.1:18180/api/delegation/execute"',
@@ -42,34 +44,37 @@ const forbiddenExecute = [
   /github\.com\/.*queue/i,
 ];
 
-const violations = forbiddenExecute
-  .filter((pattern) => pattern.test(execute))
-  .map(String);
+const violations = forbiddenExecute.filter((pattern) => pattern.test(execute)).map(String);
 
 const registrationChecks = [
   [serverIndex, "maxWriteBytes", "adapter config schema"],
-  [packageJson, '"@paperclipai/adapter-utils": "workspace:*"', "adapter-utils dependency"],
+  [serverIndex, "Evenio Control", "adapter configuration documentation"],
   [builtin, '"evenio_control"', "built-in type"],
-  [serverRegistry, '@paperclipai/adapter-evenio-control/server', "server package import"],
+  [serverRegistry, '"./evenio-control/index.js"', "server-local import"],
   [serverRegistry, 'type: "evenio_control"', "server registration"],
   [uiRegistry, 'type: "evenio_control"', "UI registration"],
   [cliRegistry, 'type: "evenio_control"', "CLI registration"],
-  [serverPackage, '"@paperclipai/adapter-evenio-control": "workspace:*"', "server workspace dependency"],
-  [lockfile, "packages/adapters/evenio-control:", "lockfile adapter importer"],
-  [lockfile, "link:../packages/adapters/evenio-control", "lockfile server link"],
+  [registryTest, '["evenio_control", "invocation_context"]', "runtime delivery strategy regression"],
 ];
 
 for (const [text, token, label] of registrationChecks) {
   if (!text.includes(token)) missing.push(label + ": " + token);
 }
 
+for (const [text, label] of [
+  [cliPackage, "cli/package.json"],
+  [serverPackage, "server/package.json"],
+  [releaseManifest, "scripts/release-package-manifest.json"],
+  [dockerfile, "Dockerfile"],
+]) {
+  if (text.includes("@paperclipai/adapter-evenio-control") || text.includes("packages/adapters/evenio-control")) {
+    violations.push("obsolete public-package coupling in " + label);
+  }
+}
+
 if (missing.length || violations.length) {
-  if (missing.length) {
-    console.error("Missing Evenio adapter implementation invariants: " + missing.join(", "));
-  }
-  if (violations.length) {
-    console.error("Forbidden Evenio adapter primitives: " + violations.join(", "));
-  }
+  if (missing.length) console.error("Missing Evenio adapter implementation invariants: " + missing.join(", "));
+  if (violations.length) console.error("Forbidden Evenio adapter primitives/couplings: " + violations.join(", "));
   process.exit(1);
 }
 

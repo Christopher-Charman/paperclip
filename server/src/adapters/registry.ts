@@ -119,12 +119,12 @@ import {
   execute as evenioControlExecute,
   testEnvironment as evenioControlTestEnvironment,
   getConfigSchema as getEvenioControlConfigSchema,
-} from "@paperclipai/adapter-evenio-control/server";
+  agentConfigurationDoc as evenioControlAgentConfigurationDoc,
+} from "./evenio-control/index.js";
 import {
   agentConfigurationDoc as openclawGatewayAgentConfigurationDoc,
   models as openclawGatewayModels,
 } from "@paperclipai/adapter-openclaw-gateway";
-import { agentConfigurationDoc as evenioControlAgentConfigurationDoc } from "@paperclipai/adapter-evenio-control";
 import { listCodexModels, refreshCodexModels } from "./codex-models.js";
 import { listCursorModels } from "./cursor-models.js";
 import {
