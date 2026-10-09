@@ -4,7 +4,7 @@ Status: design/adaptation baseline; **not deployment authority**.
 
 Upstream baseline: `paperclipai/paperclip@c83df091b1a5207375eaf23466bb5c62e4e1518e`.
 Evenio branch: `evenio/native-control-plane`.
-Runtime target: `fasthost.evenio`, root `/home/storage/368/4910368/user`.
+Runtime target: Evenio managed runtime. Runtime account identity and filesystem roots are private deployment configuration and must not be committed to this public fork.
 
 ## Non-negotiable boundaries
 
