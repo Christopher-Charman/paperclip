@@ -489,7 +489,7 @@ jobs:
   # canary publish, so the nightly publish skips re-verification.
 
   select_nightly:
-    if: github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.channel == 'nightly')
+    if: github.repository == 'paperclipai/paperclip' && (github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.channel == 'nightly'))
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
@@ -591,6 +591,7 @@ jobs:
     # Publish when smoke passed, or when smoke was deliberately skipped by a
     # dry-run dispatch (the publish itself is a dry-run in that case).
     if: >-
+      github.repository == 'paperclipai/paperclip' &&
       !cancelled() &&
       needs.select_nightly.outputs.proceed == 'true' &&
       (needs.smoke_nightly.result == 'success' ||
