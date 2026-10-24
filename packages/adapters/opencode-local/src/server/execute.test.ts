@@ -245,7 +245,7 @@ describe("OpenCode local skill injection", () => {
 
   it("passes OpenCode v2 variants as a model suffix, never an unsupported --variant flag", async () => {
     const commandPath = path.join(configHome, "fake-opencode-variant");
-    await fs.writeFile(commandPath, "#!/bin/sh\\nexit 0\\n", { mode: 0o755 });
+    await fs.writeFile(commandPath, "#!/bin/sh\nexit 0\n", { mode: 0o755 });
     runProcessMock.mockReset();
     runProcessMock.mockResolvedValue(probeResult({
       stdout: JSON.stringify({ type: "text", sessionID: "variant-session", part: { text: "ok" } }),
