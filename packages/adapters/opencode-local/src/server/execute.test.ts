@@ -242,6 +242,29 @@ describe("OpenCode local skill injection", () => {
       await fs.rm(root, { recursive: true, force: true });
     }
   });
+
+  it("passes OpenCode v2 variants as a model suffix, never an unsupported --variant flag", async () => {
+    const commandPath = path.join(configHome, "fake-opencode-variant");
+    await fs.writeFile(commandPath, "#!/bin/sh\\nexit 0\\n", { mode: 0o755 });
+    runProcessMock.mockReset();
+    runProcessMock.mockResolvedValue(probeResult({
+      stdout: JSON.stringify({ type: "text", sessionID: "variant-session", part: { text: "ok" } }),
+    }));
+    const result = await execute({
+      runId: "run-variant",
+      agent: { id: "agent-1", companyId: "company-1", name: "OpenCode", adapterType: "opencode_local", adapterConfig: {} },
+      runtime: { sessionId: null, sessionParams: null, sessionDisplayId: null, taskKey: null },
+      config: { command: commandPath, cwd: configHome, model: "openai/gpt-5", variant: "high", env: { OPENCODE_ALLOW_ALL_MODELS: "1" } },
+      context: {},
+      onLog: async () => {},
+    });
+    expect(result.exitCode).toBe(0);
+    const args = runProcessMock.mock.calls.at(-1)![3];
+    expect(args).toContain("--model");
+    expect(args).toContain("openai/gpt-5#high");
+    expect(args).not.toContain("--variant");
+  });
+
 });
 
 describe("ensureRemoteOpenCodeModelConfiguredAndAvailable", () => {
