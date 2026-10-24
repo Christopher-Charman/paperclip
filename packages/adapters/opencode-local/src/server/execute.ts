@@ -616,8 +616,7 @@ export async function execute(ctx: AdapterExecutionContext): Promise<AdapterExec
       const args = ["run", "--format", "json"];
       if (printLogs) args.push("--print-logs");
       if (resumeSessionId) args.push("--session", resumeSessionId);
-      if (model) args.push("--model", model);
-      if (variant) args.push("--variant", variant);
+      if (model) args.push("--model", variant ? `${model.split("#")[0]}#${variant}` : model);
       if (extraArgs.length > 0) args.push(...extraArgs);
       return args;
     };
