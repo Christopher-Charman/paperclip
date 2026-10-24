@@ -336,11 +336,10 @@ export async function testEnvironment(
         return asStringArray(config.args);
       })();
       const variant = asString(config.variant, "").trim();
-      const probeModel = configuredModel;
+      const probeModel = variant ? `${configuredModel.split("#")[0]}#${variant}` : configuredModel;
 
       const args = ["run", "--format", "json"];
       args.push("--model", probeModel);
-      if (variant) args.push("--variant", variant);
       if (extraArgs.length > 0) args.push(...extraArgs);
 
       // Sandbox bridges still add cold-start and transport overhead, but the
