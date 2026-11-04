@@ -48,7 +48,7 @@ function goodReceipt() {
           after_sha256: sha(content),
           bytes_written: Buffer.byteLength(content, "utf8"),
         },
-        unresolved_items: [],
+        unresolved_items: [] as string[],
         resource_usage: { bounded_actions: 1, bytes_written: Buffer.byteLength(content, "utf8") },
         completion_state: "COMPLETE",
       },
