@@ -46,6 +46,80 @@ function asRecord(value: unknown): Record<string, unknown> | null {
     : null;
 }
 
+/**
+ * Accept only the bounded Evenio workspace-write receipt shape produced by the
+ * existing delegation service. This is post-response validation, not a new
+ * execution authority or a substitute for the receiver's authentication.
+ */
+export function acceptedDelegationReceipt(
+  payload: unknown,
+  taskId: string,
+  workspacePath: string,
+  content: string,
+  maxWriteBytes: number,
+): boolean {
+  const root = asRecord(payload);
+  const result = asRecord(root?.result);
+  const admission = asRecord(result?.admission);
+  const receipt = asRecord(result?.receipt);
+  const runtime = asRecord(receipt?.runtime_receipt);
+  const actionResult = asRecord(receipt?.result);
+  const resourceUsage = asRecord(receipt?.resource_usage);
+  const actions = receipt?.actions_taken;
+  const action = Array.isArray(actions) && actions.length === 1 ? asRecord(actions[0]) : null;
+  const evidence = receipt?.evidence_refs;
+  const unresolved = receipt?.unresolved_items;
+  const bytes = Buffer.byteLength(content, "utf8");
+  const sha = createHash("sha256").update(content, "utf8").digest("hex");
+  // Python receiver canonicalizes JSON with sorted object keys.
+  const argsDigest = createHash("sha256")
+    .update(JSON.stringify({ content, expected_sha256: "absent", path: workspacePath }), "utf8")
+    .digest("hex");
+  const envelopeDigest = admission?.envelope_sha256;
+  const observedAt = runtime?.observed_at;
+  return (
+    root?.stable_runtime_id === "fasthost.evenio" &&
+    root?.tool === "delegation_execute" &&
+    root?.authority_ceiling === "write_runtime" &&
+    admission?.task_id === taskId &&
+    admission?.admitted === true &&
+    admission?.target_runtime_identity === "fasthost.evenio" &&
+    admission?.target_agent_identity === "evenio-control-agent" &&
+    Array.isArray(admission?.effective_authority) &&
+    admission.effective_authority.includes("write_runtime") &&
+    Array.isArray(admission?.effective_capabilities) &&
+    admission.effective_capabilities.includes("workspace_write") &&
+    typeof envelopeDigest === "string" &&
+    /^[0-9a-f]{64}$/.test(envelopeDigest) &&
+    receipt?.task_id === taskId &&
+    receipt?.executor_identity === "evenio-control-agent" &&
+    runtime?.stable_runtime_id === "fasthost.evenio" &&
+    typeof runtime?.execution_surface === "string" &&
+    runtime.execution_surface.length > 0 &&
+    typeof observedAt === "string" &&
+    /(Z|[+-][0-9]{2}:[0-9]{2})$/.test(observedAt) &&
+    Number.isFinite(Date.parse(observedAt)) &&
+    receipt?.completion_state === "COMPLETE" &&
+    action?.capability === "workspace_write" &&
+    action?.arguments_sha256 === argsDigest &&
+    Array.isArray(evidence) &&
+    evidence.includes("envelope_sha256:" + envelopeDigest) &&
+    Array.isArray(unresolved) &&
+    unresolved.length === 0 &&
+    actionResult?.capability === "workspace_write" &&
+    actionResult?.workspace === "paperclip-private" &&
+    actionResult?.path === workspacePath &&
+    actionResult?.created === true &&
+    actionResult?.before_sha256 === null &&
+    actionResult?.after_sha256 === sha &&
+    actionResult?.bytes_written === bytes &&
+    bytes <= maxWriteBytes &&
+    resourceUsage?.bounded_actions === 1 &&
+    resourceUsage?.bytes_written === bytes &&
+    typeof result?.idempotent_replay === "boolean"
+  );
+}
+
 export async function execute(ctx: AdapterExecutionContext): Promise<AdapterExecutionResult> {
   const token = process.env[TOKEN_ENV]?.trim() ?? "";
   if (token.length < 32) {
@@ -145,24 +219,15 @@ export async function execute(ctx: AdapterExecutionContext): Promise<AdapterExec
       return errorResult(message, `evenio_http_${response.status}`);
     }
 
-    const root = asRecord(parsed);
-    const result = asRecord(root?.result);
-    const receipt = asRecord(result?.receipt);
-    const receiptResult = asRecord(receipt?.result);
-    if (
-      root?.stable_runtime_id !== "fasthost.evenio" ||
-      root?.tool !== "delegation_execute" ||
-      root?.authority_ceiling !== "write_runtime" ||
-      receipt?.task_id !== taskId ||
-      receipt?.completion_state !== "COMPLETE" ||
-      receiptResult?.path !== workspacePath
-    ) {
+    if (!acceptedDelegationReceipt(parsed, taskId, workspacePath, content, maxWriteBytes)) {
       return errorResult(
         "Evenio delegation receipt failed identity/result validation.",
         "evenio_receipt_invalid",
       );
     }
 
+    const root = asRecord(parsed);
+    const result = asRecord(root?.result);
     const replay = result?.idempotent_replay === true;
     await ctx.onLog(
       "stdout",
