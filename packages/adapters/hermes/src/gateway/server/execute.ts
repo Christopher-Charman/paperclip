@@ -401,13 +401,10 @@ function extractRunId(value: unknown): string | null {
 function hasMismatchedRunId(value: unknown, expectedRunId: string): boolean {
   const record = asRecord(value);
   if (!record) return false;
-  if (Object.prototype.hasOwnProperty.call(record, "run_id")) {
-    return record.run_id !== expectedRunId;
-  }
-  if (Object.prototype.hasOwnProperty.call(record, "runId")) {
-    return record.runId !== expectedRunId;
-  }
-  return false;
+  return (
+    (Object.prototype.hasOwnProperty.call(record, "run_id") && record.run_id !== expectedRunId) ||
+    (Object.prototype.hasOwnProperty.call(record, "runId") && record.runId !== expectedRunId)
+  );
 }
 
 function eventNameFromData(data: unknown, fallback: string | null): string | null {
