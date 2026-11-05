@@ -397,6 +397,19 @@ function extractRunId(value: unknown): string | null {
   return nonEmpty(record?.run_id) ?? nonEmpty(record?.runId) ?? nonEmpty(record?.id);
 }
 
+/** A run-scoped endpoint may omit identity, but must not claim another run. */
+function hasMismatchedRunId(value: unknown, expectedRunId: string): boolean {
+  const record = asRecord(value);
+  if (!record) return false;
+  if (Object.prototype.hasOwnProperty.call(record, "run_id")) {
+    return record.run_id !== expectedRunId;
+  }
+  if (Object.prototype.hasOwnProperty.call(record, "runId")) {
+    return record.runId !== expectedRunId;
+  }
+  return false;
+}
+
 function eventNameFromData(data: unknown, fallback: string | null): string | null {
   const record = asRecord(data);
   return nonEmpty(record?.event) ?? nonEmpty(record?.type) ?? fallback;
@@ -481,6 +494,10 @@ async function handleEvent(
   redactText: TextRedactor = sanitizeSensitiveText,
 ): Promise<void> {
   const parsed = parseJsonData(frame.data);
+  if (hasMismatchedRunId(parsed, state.runId)) {
+    await ctx.onLog("stderr", `[hermes-gateway] ignored event for a different run (expected=${state.runId})\n`);
+    return;
+  }
   const record = asRecord(parsed);
   const eventName = eventNameFromData(parsed, frame.event);
   state.lastEventName = eventName;
@@ -541,6 +558,10 @@ async function pollStatus(input: {
         headers: input.headers,
         signal: input.signal,
       });
+      if (hasMismatchedRunId(status, input.state.runId)) {
+        await input.ctx.onLog("stderr", `[hermes-gateway] ignored status for a different run (expected=${input.state.runId})\n`);
+        continue;
+      }
       const normalized = extractStatus(status);
       if (normalized && TERMINAL_STATUSES.has(normalized)) {
         markTerminal(input.state, {
@@ -743,6 +764,7 @@ async function fetchFinalStatus(input: {
         headers: input.headers,
       });
       const record = asRecord(status);
+      if (hasMismatchedRunId(status, input.runId)) return null;
       const normalized = extractStatus(status);
       if (normalized && TERMINAL_STATUSES.has(normalized)) return record;
     } catch {
